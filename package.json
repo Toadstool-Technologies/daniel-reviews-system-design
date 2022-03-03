@@ -1,0 +1,25 @@
+{
+  "name": "daniel-reviews-system-design",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Toadstool-Technologies/daniel-reviews-system-design.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Toadstool-Technologies/daniel-reviews-system-design/issues"
+  },
+  "homepage": "https://github.com/Toadstool-Technologies/daniel-reviews-system-design#readme",
+  "dependencies": {
+    "mongodb": "^4.4.0",
+    "mongoose": "^6.2.4",
+    "postgres": "^1.0.2"
+  }
+}
