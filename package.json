@@ -18,8 +18,16 @@
   },
   "homepage": "https://github.com/Toadstool-Technologies/daniel-reviews-system-design#readme",
   "dependencies": {
+    "csv": "^6.0.5",
+    "csv-parser": "^3.0.0",
+    "fs": "^0.0.1-security",
     "mongodb": "^4.4.0",
     "mongoose": "^6.2.4",
     "postgres": "^1.0.2"
+  },
+  "devDependencies": {
+    "eslint": "^8.10.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.25.4"
   }
 }
