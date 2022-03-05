@@ -3,8 +3,9 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const ReviewSchema = new Schema({
-  product_id: Number,
-  review_id: { type: Number, index: true },
+  id: Number,
+  review_id: Number,
+  product_id: { type: Number, index: true },
   rating: Number,
   summary: String,
   recommend: Boolean,
@@ -14,7 +15,8 @@ const ReviewSchema = new Schema({
   reviewer_name: { type: String, match: /[a-zA-Z]/ },
   helpfulness: { type: Number, default: 0 },
   photos: Array,
-  reported: Boolean,
+  reported: { type: Boolean, default: false },
+  characteristics: Object,
 });
 
 const MetaSchema = new Schema({
