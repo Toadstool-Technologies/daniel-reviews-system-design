@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 const parse = require('csv-parser');
 const fs = require('fs');
-const { Review } = require('../db/index');
+const { Review, Metadata } = require('../db/index');
 
 const REVIEWS_PATH = 'ETL/csv_data/reviews.csv';
 const REVIEWS_PHOTOS_PATH = 'ETL/csv_data/reviews_photos.csv';
@@ -13,10 +13,24 @@ mongoose.connect('mongodb://localhost/reviews', {
   useNewUrlParser: true,
 });
 
+let lastProductId;
+let lastProductMeta;
 let batch = [];
+const charMetas = {};
+const charMetaArray = [];
 const photoData = {};
 const characteristics = {};
 const charReviews = {};
+
+const pushToArrayIfProductIdHasChanged = (product, currentProductId, prevProductId) => {
+  if (!prevProductId) return;
+  if (currentProductId !== prevProductId) {
+    charMetaArray.push({
+      product_id: prevProductId,
+      characteristics: product,
+    });
+  }
+};
 
 // Parse characteristics data
 fs.createReadStream(CHARACTERISTICS_PATH)
@@ -26,9 +40,34 @@ fs.createReadStream(CHARACTERISTICS_PATH)
   .pipe(parse({ delimiter: ',' }))
   .on('data', (rowData) => {
     // POPULATE CHAR OBJECT
-    characteristics[rowData.id] = rowData.name;
+    const currentProductId = rowData.product_id;
+    characteristics[rowData.id] = { name: rowData.name };
+    characteristics[rowData.id].productId = rowData.product_id;
+
+    if (!charMetas[rowData.product_id]) charMetas[rowData.product_id] = {};
+    charMetas[rowData.product_id][rowData.name] = {
+      id: rowData.id,
+      value: null,
+    };
+
+    pushToArrayIfProductIdHasChanged(
+      charMetas[lastProductId],
+      currentProductId,
+      lastProductId,
+    );
+
+    lastProductId = rowData.product_id;
+    lastProductMeta = [rowData.product_id, charMetas[rowData.product_id]];
   })
   .on('end', () => {
+    Metadata.insertMany(charMetaArray)
+      .then(() => {
+        Metadata.create({
+          product_id: lastProductMeta[0],
+          characteristics: lastProductMeta[1],
+        });
+        console.log('finished inserting Metadata');
+      });
     console.log('characteristics object populated.... matching to reviews');
     fs.createReadStream(CHAR_REVIEWS_PATH)
       .on('error', (err) => {
@@ -37,8 +76,11 @@ fs.createReadStream(CHARACTERISTICS_PATH)
       .pipe(parse({ delimiter: ',' }))
       .on('data', (rowData) => {
         // POPULATE CHAR REVIEWS OBJECT
-        if (!charReviews[rowData.review_id]) charReviews[rowData.review_id] = {};
-        charReviews[rowData.review_id][characteristics[rowData.characteristic_id]] = rowData.value;
+        const charId = rowData.characteristic_id;
+        const reviewId = rowData.review_id;
+
+        if (!charReviews[reviewId]) charReviews[reviewId] = {};
+        charReviews[reviewId][characteristics[charId].name] = rowData.value;
       })
       .on('end', () => {
         console.log('characteristics reviews object populated.... populating photos object');
@@ -70,6 +112,7 @@ fs.createReadStream(CHARACTERISTICS_PATH)
                   rating: rowData.rating,
                   date: (new Date(Number(rowData.date))).toISOString(),
                   summary: rowData.summary,
+                  response: rowData.response,
                   body: rowData.body,
                   recommend: rowData.recommend,
                   reported: rowData.reported,

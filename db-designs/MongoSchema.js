@@ -21,23 +21,6 @@ const ReviewSchema = new Schema({
 
 const MetaSchema = new Schema({
   product_id: Number,
-  ratings: {
-    type: Object,
-    default: {
-      1: 0,
-      2: 0,
-      3: 0,
-      4: 0,
-      5: 0,
-    },
-  },
-  recommended: {
-    type: Object,
-    default: {
-      false: 0,
-      true: 0,
-    },
-  },
   characteristics: {
     type: Object,
     default: {},
