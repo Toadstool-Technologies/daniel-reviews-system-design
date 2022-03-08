@@ -104,6 +104,6 @@ module.exports = {
       photos: reviewData.photos || [],
       characteristics: reviewData.characteristics,
     }));
-    res.send('review posted');
+    res.status(201).send('review posted');
   },
 };
