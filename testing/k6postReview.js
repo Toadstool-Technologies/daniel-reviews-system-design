@@ -18,7 +18,7 @@ export const options = {
 
 export default function () {
   http.post('http://127.0.0.1:3000/reviews/', {
-    product_id: 444666,
+    product_id: Math.floor(Math.random() * 1000011),
     rating: 5,
     summary: 'This is a great review',
     body: "Best I've ever seen at least. This review is unreal!",
