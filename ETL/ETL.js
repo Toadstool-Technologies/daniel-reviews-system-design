@@ -4,10 +4,10 @@ const parse = require('csv-parser');
 const fs = require('fs');
 const { Review, Metadata } = require('../db/index');
 
-const REVIEWS_PATH = 'ETL/csv_data/reviews.csv';
-const REVIEWS_PHOTOS_PATH = 'ETL/csv_data/reviews_photos.csv';
-const CHARACTERISTICS_PATH = 'ETL/csv_data/characteristics.csv';
-const CHAR_REVIEWS_PATH = 'ETL/csv_data/characteristic_reviews.csv';
+const REVIEWS_PATH = './csv_data/reviews.csv';
+const REVIEWS_PHOTOS_PATH = './csv_data/reviews_photos.csv';
+const CHARACTERISTICS_PATH = './csv_data/characteristics.csv';
+const CHAR_REVIEWS_PATH = './csv_data/characteristic_reviews.csv';
 
 mongoose.connect('mongodb://localhost/reviews', {
   useNewUrlParser: true,
