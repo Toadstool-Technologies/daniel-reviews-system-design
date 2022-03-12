@@ -2,7 +2,7 @@ const router = require('express').Router();
 const queries = require('../db/queries');
 
 router.get('/', queries.findByProductId);
-router.get('/meta/*', queries.getMetaDataByProductId);
+router.get('/meta/', queries.getMetaDataByProductId);
 
 router.post('/', queries.postNewReview);
 

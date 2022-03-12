@@ -22,18 +22,17 @@ module.exports = {
         if (page && count) {
           filteredData = data.slice(index, index + count);
         }
-        if (page) filteredData = data.slice(index, count);
-        if (count) filteredData = data.slice(0, count);
+        if (page > 0) filteredData = data.slice(index, count);
+        if (count > 0) filteredData = data.slice(0, count);
 
         filteredData.forEach((review) => {
           const { _id } = review;
-          const formattedPhotos = [];
-          review.photos.forEach((photo) => {
-            formattedPhotos.push({
+          const formattedPhotos = review.photos.map((photo) => (
+            {
               id: photo.id,
               url: photo.url,
-            });
-          });
+            }
+          ));
           outgoing.results.push({
             review_id: _id,
             rating: review.rating,
@@ -52,14 +51,6 @@ module.exports = {
   },
   getMetaDataByProductId: async (req, res) => {
     const id = req.query.product_id;
-    const reviewData = await Review.find({ product_id: id })
-      .catch((err) => {
-        res.status(500).send(err);
-      });
-    const metaIncoming = await Metadata.find({ product_id: id })
-      .catch((err) => {
-        res.status(500).send(err);
-      });
     const metaOutgoing = {
       product_id: id,
       ratings: {
@@ -71,21 +62,27 @@ module.exports = {
       characteristics: {},
     };
 
-    Object.keys(metaIncoming[0].characteristics).forEach((charName) => {
-      const current = metaIncoming[0].characteristics[charName];
-      metaOutgoing.characteristics[charName] = { id: current.id, value: null };
-    });
-
-    reviewData.forEach((review) => {
-      metaOutgoing.ratings[review.rating] += 1;
-      metaOutgoing.recommended[String(review.recommend)] += 1;
-      Object.entries(review.characteristics).forEach((char) => {
-        const charName = char[0];
-        const charVal = Number(char[1]);
-        metaOutgoing.characteristics[charName].value += charVal / reviewData.length;
+    try {
+      const reviewData = await Review.find({ product_id: id });
+      const metaIncoming = await Metadata.find({ product_id: id });
+      Object.keys(metaIncoming[0].characteristics).forEach((charName) => {
+        const current = metaIncoming[0].characteristics[charName];
+        metaOutgoing.characteristics[charName] = { id: current.id, value: null };
       });
-    });
-    res.status(200).send(metaOutgoing);
+      reviewData.forEach((review) => {
+        metaOutgoing.ratings[review.rating] += 1;
+        metaOutgoing.recommended[String(review.recommend)] += 1;
+        Object.entries(review.characteristics).forEach((char) => {
+          const charName = char[0];
+          const charVal = Number(char[1]);
+          metaOutgoing.characteristics[charName].value += charVal / reviewData.length;
+        });
+      });
+    } catch (err) {
+      res.status(500).send(err);
+    } finally {
+      res.status(200).send(metaOutgoing);
+    }
   },
   postNewReview: (req, res) => {
     const reviewData = req.body;
